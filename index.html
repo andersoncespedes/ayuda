@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Carrito de compras con Local Storage</title>
+  <style>
+    #cartItems{
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+    }
+    .sep{
+        width: 20%;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Carrito de compras</h1>
+  <form method="get" id="formulario">
+    <input type="text" name="nombre" placeholder="Nombre">
+    <input type="text"  name="descripcion" placeholder="Descripcion">
+    <input type="number"  name="precio" placeholder="Precio">
+
+    <input type="submit">Agregar al carrito</button>  
+  </form>
+  <button type="button" onclick="vaciarCarrito()">vaciar</button>
+  <div id="cartItems">
+
+  </div>
+
+  <script>
+    class CarItems{
+        constructor(form){
+            this.nombre = form.nombre.value;
+            this.descripcion = form.descripcion.value;
+            this.precio = form.precio.value
+        }
+    }
+    // Obtener los elementos del carrito del Local Storage al cargar la página
+    var cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+    const cartItemsList = document.getElementById('cartItems');
+    const formulario = document.getElementById("formulario");
+    // actualizar vista
+    function mostrarCarrito() {
+      
+      cartItemsList.innerHTML = '';
+      for (var i = 0; i < cartItems.length; i++) {
+        let sep = document.createElement("div");
+        sep.setAttribute("class", "sep");
+        let cartItem = document.createElement('h2');
+        let descItem = document.createElement("h2");
+        let precItem = document.createElement("h2");
+        cartItem.textContent = cartItems[i].nombre;
+        descItem.textContent = cartItems[i].descripcion;
+        precItem.textContent = cartItems[i].precio;
+        sep.appendChild(cartItem);
+        sep.appendChild(descItem);
+        sep.appendChild(precItem);
+
+        cartItemsList.appendChild(sep);
+      }
+      
+    }
+    formulario.addEventListener("submit", agregarAlCarrito)
+    function agregarAlCarrito(ev) {
+        ev.preventDefault()
+        let newItem = new CarItems(formulario);
+        cartItems.push(newItem);
+        mostrarCarrito();
+        localStorage.setItem('cartItems', JSON.stringify(cartItems));
+        this.reset();
+    }
+
+    function vaciarCarrito() {
+      cartItems = [];
+      mostrarCarrito();
+      localStorage.removeItem('cartItems');
+    }
+
+    mostrarCarrito();
+  </script>
+</body>
+</html>
