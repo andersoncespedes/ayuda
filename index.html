@@ -2,6 +2,7 @@
 <html>
 <head>
   <title>Carrito de compras con Local Storage</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css">
   <style>
     #cartItems{
         display: flex;
@@ -10,24 +11,44 @@
     }
     .sep{
         width: 20%;
+        margin: 10px;
     }
   </style>
 </head>
 <body>
-
-  <h1>Carrito de compras</h1>
-  <form method="get" id="formulario">
-    <input type="text" name="nombre" placeholder="Nombre">
-    <input type="text"  name="descripcion" placeholder="Descripcion">
-    <input type="number"  name="precio" placeholder="Precio">
-
-    <input type="submit">Agregar al carrito</button>  
-  </form>
-  <button type="button" onclick="vaciarCarrito()">vaciar</button>
-  <div id="cartItems">
-
+  <div class="container" >
+    <h1 style="text-align: center;">Carrito de Compras</h1>
+    <form method="get" id="formulario" class="form row">
+      <div class="form-group col-md-6">
+        <label for="">Nombre</label>
+        <input type="text" name="nombre" placeholder="Nombre" class="form-control">
+      </div>
+      
+      <div class="col-md-6">
+        <label for="">Precio</label>
+        <input type="number"  name="precio" placeholder="Precio" class="form-control">
+      </div>
+      <div class="col-md-6">
+        <label for="">Descripcion</label>
+        <textarea type="text"  name="descripcion" placeholder="Descripcion" class="form-control"> </textarea>
+      </div>
+      <div class="form-group col-md-6">
+        <input type="submit" class="btn btn-success" value="Agregar al carrito">
+      </div>
+      
+    </form>
+    
+  </div>
+ 
+  <div id="cartItems" class="container">
+    <h1 style="text-align: center;">Carrito de compras</h1>
+  </div>
+  <div class="container" style="text-align: center;">
+    <button type="button" onclick="vaciarCarrito()" class="btn btn-warning">vaciar</button>
+    <span id="total" class="container"></span>
   </div>
 
+  </span>
   <script>
     class CarItems{
         constructor(form){
@@ -36,33 +57,55 @@
             this.precio = form.precio.value
         }
     }
+    class ItemsManager{
+      constructor(param){
+        this.items = param || [];
+      }
+      precioTotal(){
+        let sum= 0;
+         this.items.forEach(element => {
+          sum+= parseInt(element.precio);
+         });
+        return sum;
+      }
+      vaciarArchivo(){
+        this.items = [];
+      }
+    }
+
     // Obtener los elementos del carrito del Local Storage al cargar la página
-    var cartItems = JSON.parse(localStorage.getItem('cartItems')) || [];
+    var cartItem = new ItemsManager(JSON.parse(localStorage.getItem('cartItems')));
+    
+    console.log(cartItem.precioTotal());
     const cartItemsList = document.getElementById('cartItems');
     const formulario = document.getElementById("formulario");
     // actualizar vista
     function mostrarCarrito() {
-      
-      cartItemsList.innerHTML = '';
+      let cartItems = cartItem.items;
+      cartItemsList.innerHTML = `<h1 style="text-align: center;" class = " col-md-12">Lista de Compras</h1>`;
       for (var i = 0; i < cartItems.length; i++) {
         let sep = document.createElement("div");
-        sep.setAttribute("class", "sep");
+        let iv = document.createElement("div");
+        iv.setAttribute("class", "card-body");
+        sep.setAttribute("class", "card sep");
         let cartItem = document.createElement('h2');
-        let descItem = document.createElement("h2");
-        let precItem = document.createElement("h2");
-        cartItem.textContent = cartItems[i].nombre;
-        descItem.textContent = cartItems[i].descripcion;
-        precItem.textContent = cartItems[i].precio;
-        sep.appendChild(cartItem);
-        sep.appendChild(descItem);
-        sep.appendChild(precItem);
-
+        let descItem = document.createElement("p");
+        let precItem = document.createElement("h4");
+        cartItem.textContent = `Nombre: ${cartItems[i].nombre}`;
+        descItem.textContent = `Descripcion: ${cartItems[i].descripcion}`;
+        precItem.textContent = `Precio: $${cartItems[i].precio}`;
+        
+        iv.appendChild(cartItem);
+        iv.appendChild(descItem);
+        iv.appendChild(precItem);
+        sep.appendChild(iv);
         cartItemsList.appendChild(sep);
       }
-      
+      document.getElementById("total").innerHTML = `<h2>Total: $${cartItem.precioTotal()}</h2>`;
     }
     formulario.addEventListener("submit", agregarAlCarrito)
     function agregarAlCarrito(ev) {
+      let cartItems = cartItem.items;
         ev.preventDefault()
         let newItem = new CarItems(formulario);
         cartItems.push(newItem);
@@ -70,11 +113,10 @@
         localStorage.setItem('cartItems', JSON.stringify(cartItems));
         this.reset();
     }
-
     function vaciarCarrito() {
-      cartItems = [];
-      mostrarCarrito();
+      cartItem.vaciarArchivo()
       localStorage.removeItem('cartItems');
+      mostrarCarrito();
     }
 
     mostrarCarrito();
